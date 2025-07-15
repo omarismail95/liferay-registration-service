@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'biz.aQute.bnd.builder' version '5.3.0'
+}
+
+group = 'com.yourcompany.registration'
+version = '1.0.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://repository-cdn.liferay.com/nexus/content/groups/public"
+    }
+}
+
+dependencies {
+    compileOnly group: 'com.liferay.portal', name: 'release.portal.api', version: '7.4.3.132'
+    implementation('org.apache.tika:tika-core:2.9.0')
+    implementation('org.apache.tika:tika-parsers:2.9.0') {
+        exclude group: 'org.apache.avalon.framework', module: 'avalon-framework-api'
+        exclude group: 'org.apache.avalon.framework', module: 'avalon-framework-impl'
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.bouncycastle' // 🛑 Exclude Bouncy Castle from Tika
+    }
+
+    implementation('org.apache.pdfbox:pdfbox:2.0.30') {
+        exclude group: 'org.apache.avalon.framework', module: 'avalon-framework'
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.bouncycastle' // 🛑 Exclude Bouncy Castle from PDFBox
+    }
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes(
+            'Bundle-ManifestVersion': '2',
+            'Bundle-SymbolicName': 'com.yourcompany.registration',
+            'Bundle-Version': version,
+            'Bundle-Name': 'Liferay Registration Service',
+            'Import-Package': '!org.apache.avalon.framework.*, !org.apache.log, !org.bouncycastle.*, !org.apache.tika.*, !com.github.javaparser.*, !com.github.luben.zstd.*, !com.microsoft.schemas.office.*, !sun.*, *',
+            'Export-Package': 'com.yourcompany.registration,com.yourcompany.registration.workflow'
+        )
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude 'META-INF/versions/**'
+        exclude 'module-info.class'
+        exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+    }
+}

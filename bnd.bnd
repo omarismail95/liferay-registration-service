@@ -1,0 +1,4 @@
+Bundle-Name: Liferay Registration Service
+Bundle-SymbolicName: com.yourcompany.registration
+Bundle-Version: 1.0.0
+Export-Package: com.yourcompany.registration.*
